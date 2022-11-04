@@ -1,6 +1,7 @@
 import './css/styles.css';
 import { fetchFilms } from "./fetchFilms";
 import { fetchFilmsPopular } from "./fetchFilmsPopular";
+import { fetchFilmId } from "./fetchFilmId"
 import debounce from "lodash.debounce"
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
@@ -12,25 +13,62 @@ const inputBtnEl = document.querySelector(".search-form__btn")
 const inputEl = document.querySelector(".search-form__input")
 const formEl = document.querySelector(".search-form")
 const galleryEl = document.querySelector(".gallery")
+const modalBtnEL = document.querySelector(".modal-button")
+const backdropEl = document.querySelector(".backdrop")
+const modalEl =document.querySelectorAll(".modalEl")
+
 
 console.log("formEl", formEl[0]);
 console.log("Hi");
 
-inputBtnEl.addEventListener('click', onFilm)
+// inputBtnEl.addEventListener('click', onFilm)
+galleryEl.addEventListener('click', onFilmFromId)
+modalBtnEL.addEventListener('click', onClouseModal)
+
 let page=1;
-let name;
+let arrFilms;
+let id;
+let arrFilmId =[];
 
-
-
+function onClouseModal(el) {
+  backdropEl.classList.add("is-hidden")
+  // backdropEl.classList.remove("is-hidden")
+}
 
 fetchFilmsPopular(page).then(response => {
-    console.log("response", response);
-    console.log("response.results", response.results);
-   
+    console.log("response 1", response);
+    console.log("response.results 1", response.results);
+    arrFilms=response.results;
+    console.log("arrFilms 1", arrFilms);
 
     const imgMarkUp = createMarkup(response.results);
     galleryEl.insertAdjacentHTML('beforeend', imgMarkUp);
 } ) 
+
+function onFilmFromId(evt){
+  evt.preventDefault();
+
+  backdropEl.classList.remove("is-hidden");
+
+  console.log("id film", evt.target.id);
+  id=evt.target.id;
+ 
+
+  fetchFilmId(page,id).then(respons => {
+    console.log("respons_film 2", respons);
+
+    // const MarkUpFilmId = createMarkupFilm(respons)
+
+    // console.log("MarkUpFilmId 2", MarkUpFilmId);
+    arrFilmId =[respons]
+    console.log("respons-[]-2");
+    return
+    // const MarkUpFilmId = createMarkupFilm(respons);
+    // modalEl.insertAdjacentHTML('beforeend', film);
+    // console.log("film", film)
+  })
+
+ }
 
     function createMarkup(arrFilms) {
         return arrFilms
@@ -39,7 +77,8 @@ fetchFilmsPopular(page).then(response => {
             <a class="film-card__link link" href="">
               <img class="film-card__img"
                 src="https://www.themoviedb.org/t/p/w220_and_h330_face${arr.backdrop_path}"
-                alt=""
+                alt="${arr.original_title}"
+                id="${arr.id}"
               />
               <div class="film-card__info">
                 <p class="film-card__name film-card__item">
@@ -59,60 +98,50 @@ fetchFilmsPopular(page).then(response => {
       }
 
 
+      function createMarkupFilm(arr) {
+        return arr.map(e =>{ 
+           
+       return `<div>Test ${e.title}</div>
+       `}).join('')
+   }
 
-      async function onFilm(evt) {
-        evt.preventDefault();
-        page=1;
-        name = inputEl.value.trim()
-        await fetchFilms(page)
-        .then(data => {   
-        } ) 
-        // const marcup = createMarkup(data)
-        // galleryEl.innerHTML = marcup;
-    }
-
-// function onPicture(e) {
-
-//          await fetchPicture(name,page)
-//           .then(data => {
-//               totalHits = data.totalHits;
-//               pageNow = totalHits/40;
-//               console.log("pageNow",pageNow);
-//               // page = 1;
-//               observer.observe(guardEl)
-//               dataLength = data.hits.length;
-            
-//           if (dataLength === 0){
-//             galleryEl.innerHTML = "";
+      // function createMarkupFilm(arr) {
+      //   console.log("arr_film", arr.title);
+     
+      //     return (
+      //       `<div>Test ${arr.title}</div>`)
+      // //     return `<img class="film-card__img"
+      // //        src="https://www.themoviedb.org/t/p/w220_and_h330_face${e.backdrop_path}"
+      // //        alt="${e.original_title}"
+      // //        id="${e.id}"
+      // //      />
+      // //        <h2>${e.title}</h2>
+      // //        <ul>
+      // //          <li class="list">Vote/Votes <span>${e.vote_average}/${e.vote_count}</span></li>
+      // //          <li class="list">Popularity <span>${e.popularity}</span></li>
+      // //          <li class="list">Original Title <span>${e.original_title}</span></li>
+      // //        </ul>
+      // //        <p>
+      // //          <h3>About</h3>
+      // //          <div>>${e.orerview}</div>
+      // //        </p>`
       
-//               Notify.failure('Sorry, there are no images matching your search query. Please try again.');
-//               return
-//           }
-//           else if (name === ""){
-//             galleryEl.innerHTML = "";
-      
-//             return
-//           }
-//           else if (dataLength < 40){ 
-//             Notify.info(`Hooray! We found ${totalHits} images.`);
-//             const marcup = createMarkup(data)
-//             galleryEl.innerHTML = marcup;
-//             lightbox.refresh()
-//             observer.unobserve(guardEl);
-//             return
-//           }
-      
-//           else{
-//               const marcup = createMarkup(data)
-//               galleryEl.innerHTML = marcup;
-//               Notify.info(`Hooray! We found ${totalHits} images.`);
-//               page +=1;
-        
-//               lightbox.refresh()
-//               return}})
-//           .catch(err => console.log(err))
-//       }
+      //     .join('');
+             
+      // }
 
+  
+    //   async function onFilm(evt) {
+    //     evt.preventDefault();
+    //     page=1;
+    //     name = inputEl.value.trim()
+    //     await fetchFilms(page)
+    //     .then(data => {   
+    //       console.log(data);
+    //     } ) 
+    //     // const marcup = createMarkup(data)
+    //     // galleryEl.innerHTML = marcup;
+    // }
 
 
 
